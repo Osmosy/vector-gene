@@ -1,5 +1,7 @@
 # Vector Gene
 
+[![Ecosystem: Vector](https://img.shields.io/badge/Ecosystem-Vector-blue.svg)](https://osmosy.github.io/)
+
 ![Vector Gene](assets/vector-logo.png)
 
 **Vector Gene — личная геномика с AI-агентами.** Паттерн «структурированные данные + domain-инструменты + AI-агент»: один человек без биоинформатического образования + AI = результаты уровня лаборатории за часы, а не месяцы. OKF-шаблон данных, пайплайн FASTQ → выравнивание (hg38) → варианты → ClinVar/gnomAD → AlphaMissense, фармакогенетика (CYP450, VKORC1/CYP2C9). Всё локально, без загрузки данных.
