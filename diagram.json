@@ -1,0 +1,264 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Vector Gene — личная геномика с AI-агентами",
+    "output": "docs/vector-gene.architecture.html",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "variant-path",
+        "label": "Путь варианта",
+        "focus": [
+          "patient",
+          "agent",
+          "dbsnp",
+          "clinvar",
+          "gnomad",
+          "alphagenome",
+          "hypotheses"
+        ],
+        "note": "Вариант проходит базы и модель: координаты, клиника, частота, предсказание, вывод."
+      },
+      {
+        "id": "local-perimeter",
+        "label": "Локальный контур",
+        "focus": [
+          "raw",
+          "patient",
+          "agent",
+          "hypotheses"
+        ],
+        "note": "Данные пациента и выводы остаются на машине; наружу уходят только запросы к базам."
+      },
+      {
+        "id": "decision",
+        "label": "Граница решения",
+        "focus": [
+          "agent",
+          "hypotheses",
+          "doctor"
+        ],
+        "note": "Агент формирует гипотезы, врач принимает клинические решения."
+      }
+    ],
+    "viewBox": [
+      1240,
+      640
+    ]
+  },
+  "components": [
+    {
+      "id": "raw",
+      "type": "external",
+      "label": "Сырые данные",
+      "pos": [
+        40,
+        180
+      ],
+      "size": [
+        150,
+        60
+      ]
+    },
+    {
+      "id": "patient",
+      "type": "database",
+      "label": "data/patient",
+      "pos": [
+        290,
+        180
+      ],
+      "size": [
+        150,
+        60
+      ]
+    },
+    {
+      "id": "agent",
+      "type": "backend",
+      "label": "Hermes Agent",
+      "pos": [
+        540,
+        180
+      ],
+      "size": [
+        160,
+        60
+      ]
+    },
+    {
+      "id": "dbsnp",
+      "type": "external",
+      "label": "dbSNP",
+      "pos": [
+        800,
+        180
+      ],
+      "size": [
+        130,
+        60
+      ]
+    },
+    {
+      "id": "clinvar",
+      "type": "external",
+      "label": "ClinVar",
+      "pos": [
+        1030,
+        180
+      ],
+      "size": [
+        140,
+        60
+      ]
+    },
+    {
+      "id": "gnomad",
+      "type": "external",
+      "label": "gnomAD",
+      "pos": [
+        1030,
+        440
+      ],
+      "size": [
+        140,
+        60
+      ]
+    },
+    {
+      "id": "alphagenome",
+      "type": "cloud",
+      "label": "AlphaGenome Atlas",
+      "pos": [
+        760,
+        440
+      ],
+      "size": [
+        190,
+        60
+      ]
+    },
+    {
+      "id": "hypotheses",
+      "type": "database",
+      "label": "HYPOTHESES · analysis",
+      "pos": [
+        440,
+        440
+      ],
+      "size": [
+        230,
+        60
+      ]
+    },
+    {
+      "id": "doctor",
+      "type": "external",
+      "label": "Врач",
+      "pos": [
+        180,
+        440
+      ],
+      "size": [
+        140,
+        60
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "security-group",
+      "label": "Локальный контур",
+      "wraps": [
+        "raw",
+        "patient",
+        "agent",
+        "hypotheses"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "c1",
+      "from": "raw",
+      "to": "patient",
+      "label": "импорт"
+    },
+    {
+      "id": "c2",
+      "from": "patient",
+      "to": "agent",
+      "label": "локально",
+      "variant": "emphasis"
+    },
+    {
+      "id": "c4",
+      "from": "agent",
+      "to": "dbsnp",
+      "label": "вариант"
+    },
+    {
+      "id": "c5",
+      "from": "dbsnp",
+      "to": "clinvar",
+      "label": "rsID"
+    },
+    {
+      "id": "c6",
+      "from": "clinvar",
+      "to": "gnomad",
+      "label": "частота",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDx": 34,
+      "labelDy": 52
+    },
+    {
+      "id": "c7",
+      "from": "gnomad",
+      "to": "alphagenome",
+      "label": "редкий"
+    },
+    {
+      "id": "c8",
+      "from": "alphagenome",
+      "to": "hypotheses",
+      "label": "сводка",
+      "variant": "emphasis"
+    },
+    {
+      "id": "c9",
+      "from": "hypotheses",
+      "to": "doctor",
+      "label": "гипотезы",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "Квантиль проверяют магнитудой",
+      "items": [
+        "Квантиль 0.99 при сыром балле 0.01 — артефакт низкой дисперсии фона",
+        "Вывод в этом случае: значимого молекулярного эффекта не предсказано"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Отрицательный результат — результат",
+      "items": [
+        "Три из шести кейсов AlphaGenome отрицательные",
+        "Отдельный кейс — слепая зона модели по вторичной структуре РНК (RNU4ATAC)"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Границы соблюдает harness",
+      "items": [
+        "AlphaGenome: Research Use Only, клинические выводы запрещены",
+        "Личные данные остаются локально, в репозиторий идёт только синтетика"
+      ]
+    }
+  ]
+}

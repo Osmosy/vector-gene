@@ -1,0 +1,21 @@
+# Реальные данные пациента не коммитятся никогда — только синтетика в шаблоне
+data/patient/genetic/raw/*
+!data/patient/genetic/raw/.gitkeep
+data/patient/reports/*
+!data/patient/reports/.gitkeep
+.patient-private/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+uv.lock
+
+# Секреты
+.env
+.env.local
+
+# Служебное
+__pycache__/
+*.log
+.zvec-grep/

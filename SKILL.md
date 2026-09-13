@@ -1,146 +1,157 @@
 ---
 name: vector-gene
-description: Personal genomics analysis with AI agents. Template for structured health data (OKF-style Markdown), agent-driven genomic analysis pipeline (FASTQ → variants → ClinVar/gnomAD → AlphaMissense), drug response prediction, and cross-patient comparison. Use when working with genetic test data (23andMe, Genotek, Atlas, WGS/WES), building personal health dashboards, or creating AI-powered medical second opinions.
-based_on: Rai220/my-health-public — personal health record system with AI agent support
+description: "Personal genomics: patient template + 40 science skills."
+version: 2.0.0
+author: Hermes Agent
+based_on: google-deepmind/science-skills (Apache-2.0) + Rai220/my-health-public
+tags: [genomics, personal-health, variants, alphagenome, clinvar, gnomad, pharmgkb]
 ---
 
 # Vector Gene — Personal Genomics with AI Agents
 
-## Overview
+Второй слой поверх коллекции научных навыков Google DeepMind. Шаблон данных
+пациента + доступ к реальным научным базам и моделям вместо эрудиции модели.
 
-Pattern for AI-driven personal genomics: structured health data in Markdown
-+ domain tools (samtools, bcftools, AlphaMissense API) + AI agent as reasoning layer.
+## Когда использовать
 
-One person without bioinformatics training + AI agent = results comparable
-to professional lab analysis, done in hours instead of months.
+- Пользователь принёс файл генетического теста (23andMe, Genotek, Atlas, WGS/WES/VCF)
+- Нужна аннотация варианта: что о нём известно клинически (ClinVar), как часто
+  встречается (gnomAD), где ген экспрессируется (GTEx), что рядом регуляторного
+  (ENCODE), как предсказано функциональное влияние (AlphaGenome AVI)
+- Фармакогенетика: CYP2C9/CYP2C19/VKORC1/CYP4F2 и другие гены метаболизма
+- Проверка лабораторного отчёта по сырым данным
 
-## Data Template (OKF-style)
+## Когда НЕ использовать
+
+- **Клинические вопросы.** Диагнозы, назначения, интерпретация для лечения — не сюда.
+  Навыки AlphaGenome прямо запрещают клиническое применение (Research Use Only),
+  и агент обязан ответить, что это исследовательский инструмент.
+- **Соматические мутации в опухолях** — это COSMIC, не gnomAD (правило из самого
+  gnomad_database: «не использовать для соматических мутаций в раке»).
+- **Поиск гомологов** — protein_sequence_similarity_search, не MSA.
+- **Структурный поиск по последовательности** — нужен файл координат (.cif/.pdb),
+  имя гена не подойдёт (foldseek_structural_search).
+- **Нет идентификатора, только имя гена** — сначала получить UniProt ID
+  (uniprot_database), потом AlphaFold.
+
+## Структура
 
 ```
-patient/
-├── SUMMARY.md          # One-page overview
-├── HISTORY.md          # Medical history, timeline
-├── MEASUREMENTS.md     # Vitals, lab results over time
-├── MEDS.md             # Current and past medications
-├── PROBLEMS.md         # Active health issues
-├── TESTS.md            # Test results (blood, imaging, etc.)
-├── VISITS.md           # Doctor visits log
-├── HYPOTHESES.md       # Agent-generated hypotheses to verify
-├── QUESTIONS.md        # Questions for doctor
-├── TREATMENT_PLAN.md   # Current treatment plan
-├── TODO.md             # Next steps
-├── genetic/
-│   ├── raw/            # FASTQ, VCF, 23andMe raw data
-│   ├── variants.md     # Curated variant list
-│   └── analysis.md     # Agent analysis output
-├── drugs/
-│   └── responses.md    # Drug response predictions
-└── reports/            # Lab reports, scans (PDF)
+skills/science/            — 40 навыков Google DeepMind (Apache-2.0), вендор-копия
+  alphagenome_*            — 3 навыка: AVI-скоры, анализ варианта, deep-links в Atlas
+  clinvar / gnomad / dbsnp / gtex / encode / ucsc / unibind / jaspar / ensembl
+  alphafold / pdb / foldseek / uniprot / interpro / string / hpa / msa / pymol
+  chembl / pubchem / openfda / opentargets / clinical_trials
+  pubmed / europepmc / openalex / arxiv / biorxiv
+  reactome / quickgo / embl_ebi_ols / ncbi_sequence_fetch / predictingthepast
+  uv / credentials / workflow_skill_creator   — служебный слой
+docs/upstream/             — лицензии и README апстрима (Apache-2.0 + SKILL_LICENSES)
+docs/archive/              — прежняя версия этого файла (v1, 28.06.2026)
+docs/vector-gene.architecture.html  — живая диаграмма (GitHub Pages)
+data/patient/              — OKF-шаблон данных пациента (синтетический)
 ```
 
-## Genomic Analysis Pipeline
+## Как запускать научные навыки
 
-### Input Data Types
+Все скрипты навыков запускаются только через `uv run` — системный Python не имеет
+нужных библиотек. Служебный навык `skills/science/uv/` отвечает за установку и PATH.
+Секреты проверяются протоколом `skills/science/credentials/` — наличие ключа
+проверяется кодом возврата (`grep -sq`), значение в контекст не попадает.
 
-| Source | Format | Typical size |
-|--------|--------|-------------|
-| 23andMe/Genotek/Atlas | TXT/CSV, ~700K SNPs | ~25 MB |
-| Whole Exome (WES) | FASTQ pair | ~8 GB |
-| Whole Genome (WGS) | FASTQ pair | ~100 GB |
-
-### Pipeline (agent-driven)
+Ключи пишутся в `~/.env` одной строкой:
 
 ```bash
-# 1. Quality control
-fastqc raw/*.fastq.gz -o qc/
+echo "ALPHAGENOME_API_KEY=..." >> ~/.env     # обязателен для трёх alphagenome-навыков
+echo "OPENALEX_API_KEY=..." >> ~/.env        # обязателен для literature_search_openalex
+```
 
-# 2. Alignment to reference genome
+ClinVar, dbSNP, PubMed, openFDA, NCBI работают без ключа, но с лимитами частоты.
+
+## Пайплайн: сырые данные → варианты → аннотация
+
+```bash
+# 1. QC
+fastqc raw/*.fastq.gz -o qc/
+# 2. Выравнивание на hg38
 bwa mem -t 8 ref/hg38.fa raw/sample_R1.fastq.gz raw/sample_R2.fastq.gz | \
   samtools sort -o aligned/sample.bam
-
-# 3. Variant calling
-bcftools mpileup -f ref/hg38.fa aligned/sample.bam | \
-  bcftools call -mv -o variants/sample.vcf
-
-# 4. Annotation (agent does this via API/DB queries)
-# - ClinVar: clinical significance
-# - gnomAD: population frequency
-# - dbSNP: known variant IDs
-# - AlphaMissense: pathogenicity prediction for missense variants
+# 3. Вызов вариантов
+bcftools mpileup -f ref/hg38.fa aligned/sample.bam | bcftools call -mv -o variants/sample.vcf
 ```
 
-### Agent Instructions (AGENTS.md)
+Аннотацию делает агент навыками, а не сам: `clinvar_database` → `gnomad_database` →
+`gtex_database` → `encode_ccres_database` → `alphagenome_*`. Для 23andMe/Genotek
+(готовые SNP-таблицы) шаги 1–3 не нужны, начинается сразу с аннотации.
+
+Сквозные цепочки, которые коллекция держит намеренно:
 
 ```
-Ты — AI-ассистент для анализа медицинских и генетических данных.
-Работаешь с пациентом через Telegram/Hermes.
-
-Принципы:
-1. Объясняй медицинские термины простым языком
-2. Выявляй скрытые взаимосвязи между показателями
-3. Проверяй полноту обследований — что пропущено?
-4. Для генетических вариантов: ClinVar → gnomAD → AlphaMissense
-5. Формируй гипотезы, но всегда помечай их как «требует проверки врачом»
-6. Для лекарств: проверяй фармакогенетику (CYP450 и другие гены метаболизма)
+dbSNP → ClinVar → gnomAD → AlphaGenome → GTEx → ENCODE      (некодирующий вариант)
+UniProt → InterPro → AlphaFold → Foldseek → STRING → PyMOL   (незнакомый белок)
+Open Targets → ChEMBL → ClinicalTrials → openFDA → PubMed    (терапевтическая мишень)
 ```
 
-## Key Tools
+## Правило интерпретации (из alphagenome_single_variant_analysis)
 
-### Genomics CLI (conda)
-```bash
-conda install -c bioconda bwa samtools bcftools fastqc
+Высокий квантиль сам по себе ничего не значит. Обязательна сверка с сырым баллом:
+
+| квантиль | сырой балл | что это значит |
+|---|---|---|
+| высокий ~0.99 | низкий ~0.01 | ложная тревога: артефакт низкой дисперсии фона |
+| высокий 0.998 | низкий ~0.01 | тот же артефакт + механизм вне области модели |
+| низкий <0.1 | низкий <0.1 | честное отсутствие сигнала |
+
+Формулировка вывода в первом и втором случае — «значимого молекулярного эффекта
+AlphaGenome не предсказывает», а не поиск объяснения. Готовые разборы лежат в
+`skills/science/alphagenome_single_variant_analysis/docs/examples/` (шесть кейсов,
+три из них — отрицательные).
+
+Отдельно: для snRNA/tRNA/rRNA модель не симулирует посттранскрипционную укладку —
+при анализе таких генов это надо оговаривать явно (кейс RNU4ATAC).
+
+## Данные пациента (OKF-шаблон)
+
+```
+data/patient/
+├── SUMMARY.md HISTORY.md MEASUREMENTS.md MEDS.md PROBLEMS.md
+├── TESTS.md VISITS.md HYPOTHESES.md QUESTIONS.md TREATMENT_PLAN.md TODO.md
+├── genetic/raw/  genetic/variants.md  genetic/analysis.md
+├── drugs/responses.md
+└── reports/
 ```
 
-### Variant Databases (API/Web)
-- ClinVar: https://www.ncbi.nlm.nih.gov/clinvar/
-- gnomAD: https://gnomad.broadinstitute.org/
-- dbSNP: https://www.ncbi.nlm.nih.gov/snp/
+В репозиторий кладутся только **синтетические** данные. Реальные данные пациента
+не коммитятся никогда.
 
-### AlphaMissense (DeepMind)
-Predicts pathogenicity of missense variants using AlphaFold protein structure.
-API or precomputed database: https://github.com/google-deepmind/alphamissense
+## Ограничения (знать до запуска)
 
-### PharmGKB (Pharmacogenomics)
-Drug-gene interactions: https://www.pharmgkb.org/
+- **AlphaGenome — Research Use Only.** Выводы только как гипотезы; клиническое
+  применение запрещено условиями доступа к API.
+- **WGS требует ресурсов.** ~100 ГБ FASTQ, выравнивание на hg38 — не «за часы» на
+  ноутбуке; реально считать на 23andMe/VCF или на внешнем вычислителе.
+- **AlphaMissense без API.** Публичного API нет: только веса модели или precomputed
+  база (~1 ГБ). Строка «API или precomputed database» — только второе.
+- **Навыки — обёртки над внешними API.** Недоступность базы или смена её API ломает
+  навык, и агент не всегда это замечает сразу.
+- **Сторонние данные под своими лицензиями.** Код навыков Apache-2.0, но у источников
+  (GTEx, HPA, Reactome, Open Targets, UniProt/EMBL-EBI, RCSB, UCSC, NCBI) свои условия
+  с требованием атрибуции. См. `docs/upstream/science-skills-SKILL_LICENSES.md`.
+- **Личные данные и чужие сервисы.** Загрузка генома в облачную LLM может противоречить
+  соглашению лаборатории; локальный агент от этого свободен.
 
-## Use Cases
+## Приватность
 
-### 1. Drug Response Prediction
-```
-Q: "Как на меня подействует варфарин?"
-A: Проверяю VKORC1, CYP2C9, CYP4F2 → расчёт дозировки по генотипу
-```
+- Все данные локально, в markdown-файлах, не загружаются в репозиторий
+- Агент — локальный или с политикой нулевого хранения
+- Выводы — гипотезы, требующие проверки врачом; назначения по ним не делаются
 
-### 2. Cross-Patient Comparison
-```
-Q: "От кого ребёнок унаследовал непереносимость лактозы?"
-A: Сравниваю MCM6 варианты родителей и ребёнка → ответ
-```
+## Ссылки
 
-### 3. RPG-Style Dashboard
-Generate interactive HTML dashboard with genetic traits as "character stats":
-- Class (based on genetic predispositions)
-- Skills (cognitive, physical traits)
-- Perks & Debuffs (beneficial and risk variants)
-- Appearance (pigmentation genes)
-- Biochemical pathways (dopamine, serotonin)
+- Навыки: [google-deepmind/science-skills](https://github.com/google-deepmind/science-skills) (Apache-2.0)
+- AlphaGenome Atlas: [deepmind.google.com/science/alphagenome/atlas](https://deepmind.google.com/science/alphagenome/atlas)
+- Основание шаблона: [Rai220/my-health-public](https://github.com/Rai220/my-health-public)
+- Базы: [ClinVar](https://www.ncbi.nlm.nih.gov/clinvar/) · [gnomAD](https://gnomad.broadinstitute.org/) · [dbSNP](https://www.ncbi.nlm.nih.gov/snp/) · [GTEx](https://gtexportal.org/) · [PharmGKB](https://www.pharmgkb.org/)
+- DeepMind AlphaMissense: [github.com/google-deepmind/alphamissense](https://github.com/google-deepmind/alphamissense)
 
-### 4. Lab Report Verification
-Agent re-analyzes raw data from scratch, comparing against lab report.
-Catches missed variants, outdated reference genomes, incomplete panels.
-
-## Privacy & Ethics
-
-- All data stays LOCAL (Markdown files, never uploaded)
-- Agent runs on local model or API with zero-data-retention policy
-- Results are HYPOTHESES — always verify with medical professional
-- Never make treatment decisions based solely on agent output
-- Template uses SYNTHETIC data — real patient data never committed
-
-## References
-
-- Rai220/my-health-public: https://github.com/Rai220/my-health-public
-- AlphaMissense: https://github.com/google-deepmind/alphamissense
-- ClinVar: https://www.ncbi.nlm.nih.gov/clinvar/
-- gnomAD: https://gnomad.broadinstitute.org/
-- PharmGKB: https://www.pharmgkb.org/
+> Выводы агента — гипотезы для обсуждения с врачом, не медицинские назначения.
+> Реальные данные пациента никогда не загружаются в репозиторий.
