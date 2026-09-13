@@ -19,3 +19,8 @@ uv.lock
 __pycache__/
 *.log
 .zvec-grep/
+
+# Артефакты визуальной проверки диаграммы (генерируются visual-check)
+docs/*.visual-check.json
+docs/*.visual-check.html
+docs/*.visual-check.*.png
