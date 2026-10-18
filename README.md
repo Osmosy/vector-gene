@@ -137,6 +137,8 @@ ClinVar, dbSNP, PubMed, openFDA, NCBI работают без ключа, но �
 - **WGS требует ресурсов** (~100 ГБ FASTQ и выравнивание на hg38) — на ноутбуке
   реалистично считать 23andMe/VCF, а не полный геном.
 - **AlphaMissense без публичного API** — только веса модели или precomputed-база.
+  Отдельного скора нет, но вклад AlphaMissense виден внутри AVI (`top_modality`,
+  `fi_ALPHAMISSENSE` при `--include_features`): это модальность AVI, а не standalone-скор.
 - **Навыки — обёртки над внешними API**: недоступность базы ломает навык.
 - **У источников данных свои лицензии** (GTEx, HPA, Reactome, Open Targets, UniProt,
   RCSB, UCSC, NCBI) — с требованием атрибуции. См. [docs/upstream/](docs/upstream/).
