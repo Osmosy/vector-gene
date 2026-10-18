@@ -9,9 +9,10 @@
   404-х ссылок;
 - README утверждал, что у каждого навыка есть scripts/ и references/, хотя у четырёх
   навыков нет scripts/, а у четырёх — references/;
-- числа «40 навыков / 66 скриптов / 8334 строки» были проставлены руками и не
+- числа «40 навыков / 66 скриптов / 8357 строк» были проставлены руками и не
   проверялись;
-- в SKILL.md «шесть кейсов, три из них отрицательные», хотя отрицательных два.
+- в SYNTHETIC-примере пациента SUMMARY расходился с таблицами: «активных препаратов 1»
+  при двух активных в MEDS, «гипотез 1» при двух, «вопросов 2» при трёх.
 
 Запуск:  python3 scripts/validate_docs.py [--repo-root DIR] [--json]
 Выход:   0 — всё чисто; 1 — есть ошибки.
@@ -22,6 +23,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 from urllib.parse import unquote
@@ -30,7 +32,7 @@ LINK_RE = re.compile(r"\]\(([^)\s]+)\)")
 BADGE_SKILLS_RE = re.compile(r"badge/Skills-(\d+)")
 TABLE_ROW_RE = re.compile(r"^\|\s*[^|]+\|\s*(\d+)\s*\|")
 PY_COUNT_RE = re.compile(r"(\d+)\s+Python-скрипт")
-LINES_RE = re.compile(r"(\d+)\s+строк")
+LINES_RE = re.compile(r"(\d+)\s+строк(?:и)?\s+инструкций")
 SKILLS_TEXT_RE = re.compile(r"\b(\d+)\s+(?:[а-яё]+\s+)?навыков")
 
 
@@ -46,8 +48,18 @@ def skill_dirs(root: Path) -> list[Path]:
 
 
 def py_scripts(root: Path) -> int:
+    """Считаем файлы в git, а не на диске: на диске бывают .venv и другой мусор."""
     base = root / "skills" / "science"
-    return sum(1 for _ in base.rglob("*.py")) if base.is_dir() else 0
+    if not base.is_dir():
+        return 0
+    try:
+        out = subprocess.run(
+            ["git", "-C", str(root), "ls-files", "skills/science"],
+            capture_output=True, text=True, check=True, timeout=30,
+        ).stdout
+    except (OSError, subprocess.SubprocessError):
+        return sum(1 for _ in base.rglob("*.py"))
+    return sum(1 for line in out.splitlines() if line.endswith(".py"))
 
 
 def skill_line_count(root: Path) -> int:
@@ -177,7 +189,10 @@ def check_gitkeep(root: Path) -> list[str]:
 
 def check_duplicates(root: Path) -> list[str]:
     """Дубли строк в .gitignore (например, __pycache__/ дважды)."""
-    entries = [ln.strip() for ln in read(root / ".gitignore").splitlines() if ln.strip()]
+    gi = root / ".gitignore"
+    if not gi.is_file():
+        return [".gitignore нет"]
+    entries = [ln.strip() for ln in read(gi).splitlines() if ln.strip()]
     seen: set[str] = set()
     dups: set[str] = set()
     for entry in entries:
@@ -185,6 +200,39 @@ def check_duplicates(root: Path) -> list[str]:
             dups.add(entry)
         seen.add(entry)
     return [f".gitignore: дубль {d}" for d in sorted(dups)]
+
+
+def check_patient_summary(root: Path) -> list[str]:
+    """Числа в SUMMARY.md должны совпадать с таблицами в том же каталоге."""
+    base = root / "data" / "patient"
+    summary = base / "SUMMARY.md"
+    if not summary.is_file():
+        return []
+    text = read(summary)
+    errors: list[str] = []
+
+    def recount(path: Path, marker: str, row: re.Pattern[str] | None) -> int:
+        lines = read(path).splitlines()
+        if row is not None:
+            return sum(1 for line in lines if row.match(line))
+        if marker.startswith("|"):
+            return sum(1 for line in lines if line.startswith("|") and marker in line)
+        return sum(1 for line in lines if line.startswith(marker))
+
+    cases = (
+        ("Активных препаратов", "MEDS.md", "| активен |", None),
+        ("Открытых гипотез", "HYPOTHESES.md", "", re.compile(r"^\|\s*\d+\s*\|")),
+        ("Вопросов врачу", "QUESTIONS.md", "- ", None),
+    )
+    for label, filename, marker, row in cases:
+        m = re.search(rf"{label}:\s*(\d+)", text)
+        path = base / filename
+        if not m or not path.is_file():
+            continue
+        real = recount(path, marker, row)
+        if int(m.group(1)) != real:
+            errors.append(f"SUMMARY: «{label}: {m.group(1)}», а в {filename} — {real}")
+    return errors
 
 
 def main() -> int:
@@ -200,6 +248,7 @@ def main() -> int:
         "links": check_links(root),
         "gitkeep": check_gitkeep(root),
         "gitignore_dups": check_duplicates(root),
+        "patient_summary": check_patient_summary(root),
     }
     errors = [f"[{name}] {msg}" for name, msgs in checks.items() for msg in msgs]
 
