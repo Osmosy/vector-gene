@@ -79,12 +79,12 @@ Hermes Agent — слой рассуждений
 референса: `bwa index ref/hg38.fa` и `samtools faidx ref/hg38.fa`.
 
 ```
-FASTQ → fastqc → bwa mem (hg38, -R read group) → samtools sort → samtools markdup
-      → samtools index → bcftools mpileup/call
-      → ClinVar / gnomAD / dbSNP / GTEx / ENCODE → AlphaGenome
+FASTQ → fastqc → bwa mem (hg38, -R read group) → samtools collate → fixmate -m
+      → samtools sort → samtools markdup → samtools index → bcftools mpileup/call
+      → dbSNP / ClinVar / gnomAD / AlphaGenome / GTEx / ENCODE
 ```
 
-Для WGS рекомендуемый путь — GATK/DeepVariant; выше минимальный пример для VCF/панели.
+Для WGS рекомендуемый путь — GATK/DeepVariant; выше минимальный пример для панели/WES.
 Для готовых SNP-таблиц (23andMe, Genotek, Atlas) первые шаги не нужны — аннотация
 начинается сразу. Сквозные цепочки, которые коллекция держит намеренно:
 

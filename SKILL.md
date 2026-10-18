@@ -79,26 +79,40 @@ ClinVar, dbSNP, PubMed, openFDA, NCBI работают без ключа, но �
 ## Пайплайн: сырые данные → варианты → аннотация
 
 ```bash
-# Инструменты внешние (в коллекции навыков их нет): conda install -c bioconda fastqc bwa samtools bcftools
+# Инструменты внешние (в коллекции навыков их нет):
+#   conda install -c bioconda fastqc bwa samtools bcftools
 # 0. Индексы референса (один раз)
 bwa index ref/hg38.fa
 samtools faidx ref/hg38.fa
 # 1. QC
 fastqc raw/*.fastq.gz -o qc/
-# 2. Выравнивание на hg38: read group обязателен, иначе mpileup/ GATK дадут некорректный результат
+# 2. Выравнивание. Read group обязателен, иначе mpileup/GATK дадут некорректный результат.
+#    collate + fixmate -m обязательны: markdup берёт теги MC/ms, которые ставит fixmate.
 bwa mem -t 8 -R '@RG\tID:sample\tSM:sample\tPL:ILLUMINA' ref/hg38.fa \
-  raw/sample_R1.fastq.gz raw/sample_R2.fastq.gz | samtools sort -o aligned/sample.bam
-# 3. Маркировка дублей и индекс
-samtools markdup -r aligned/sample.bam aligned/sample.markdup.bam
+    raw/sample_R1.fastq.gz raw/sample_R2.fastq.gz \
+  | samtools collate -O -u - \
+  | samtools fixmate -m -u - - \
+  | samtools sort -u - \
+  | samtools markdup - aligned/sample.markdup.bam
+# 3. Индекс
 samtools index aligned/sample.markdup.bam
 # 4. Вызов вариантов
 bcftools mpileup -f ref/hg38.fa aligned/sample.markdup.bam | bcftools call -mv -o variants/sample.vcf
 ```
 
-Для WGS рекомендуемый путь — GATK/DeepVariant; это минимальный пример.
+`-r` у `markdup` не используем: дубли помечаются, а не удаляются — иначе теряется
+информация для оценки качества.
 
-Аннотацию делает агент навыками, а не сам: `clinvar_database` → `gnomad_database` →
-`dbsnp_database` → `gtex_database` → `encode_ccres_database` → `alphagenome_*`.
+Проверено 2026-10-18 на фрагменте chr22 (100 кб, `wgsim -N 20000`): цепочка
+`bwa mem | collate | fixmate -m | sort | markdup` даёт 40 000 ридов, 100% mapped,
+34 помеченных дубля и 96 вариантов в VCF. Без `collate`/`fixmate` тот же вход
+падает с `samtools markdup: error, no ms score tag`.
+
+Для WGS рекомендуемый путь — GATK/DeepVariant; это минимальный пример для панели/WES.
+
+Аннотацию делает агент навыками, а не сам: `dbsnp_database` (rsID → координаты) →
+`clinvar_database` → `gnomad_database` → `alphagenome_*` → `gtex_database` →
+`encode_ccres_database`.
 Для 23andMe/Genotek (готовые SNP-таблицы) шаги 1–4 не нужны, начинается сразу с аннотации.
 
 Сквозные цепочки, которые коллекция держит намеренно:
