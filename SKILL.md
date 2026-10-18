@@ -108,10 +108,11 @@ bcftools mpileup -f ref/hg38.fa aligned/sample.markdup.bam | bcftools call -mv -
 `-r` у `markdup` не используем: дубли помечаются, а не удаляются — иначе теряется
 информация для оценки качества.
 
-Проверено 2026-10-18 на фрагменте chr22 (100 кб, `wgsim -N 20000`): цепочка
+Проверено 2026-10-18 на фрагменте chr22 (100 кб, `wgsim -N 20000 -S 42`): цепочка
 `bwa mem | collate | fixmate -m | sort | markdup` даёт 40 000 ридов, 100% mapped,
-34 помеченных дубля и 96 вариантов в VCF. Без `collate`/`fixmate` тот же вход
-падает с `samtools markdup: error, no ms score tag`.
+18 помеченных дублей и 111 вариантов в VCF (bwa 0.7.19, samtools 1.24, bcftools 1.24).
+Воспроизводится: `bash scripts/smoke_pipeline.sh` — он же проверяет, что без
+`collate`/`fixmate` тот же вход падает с `samtools markdup: error, no ms score tag`.
 
 Для WGS рекомендуемый путь — GATK/DeepVariant; это минимальный пример для панели/WES.
 
@@ -142,6 +143,12 @@ Open Targets → ChEMBL → ClinicalTrials → openFDA → PubMed    (терап
 AlphaGenome не предсказывает», а не поиск объяснения. Готовые разборы лежат в
 `skills/science/alphagenome_single_variant_analysis/docs/examples/` (шесть кейсов:
 отрицательные результаты и границы модели).
+
+Поля двух навыков не взаимозаменяемы. У AVI `avi_quantile` — **хвостовой** квантиль
+(1 − CDF): меньше значит сильнее, `avi_phred = −10·log10(avi_quantile)`, так что
+0.0012 ≈ Phred 29.2, а 0.99 — обычный вариант (Phred ≈ 0.04). У
+`alphagenome_single_variant_analysis` поле `quantile_score` знаковое: чем ближе к ±1,
+тем сильнее (критерий `|quantile_score| > 0.995`).
 
 Отдельно: для snRNA/tRNA/rRNA модель не симулирует посттранскрипционную укладку —
 при анализе таких генов это надо оговаривать явно (кейс RNU4ATAC).
