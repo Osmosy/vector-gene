@@ -70,9 +70,14 @@ chmod 600 ~/.env
 
 - `ALPHAGENOME_API_KEY` — обязателен для трёх alphagenome-навыков
 - `OPENALEX_API_KEY` — обязателен для literature_search_openalex
+- `USER_EMAIL` — **обязателен для `protein_sequence_msa`** (EBI без него отказывает);
+  используется также `protein_sequence_similarity_search`, `pubmed_database`
+  и как запасной адрес для `clinvar_database`
 - `NCBI_API_KEY` — опционально, 10 req/s вместо 3; `NCBI_EMAIL` и `NCBI_TOOL` —
   идентификация клиента для автоматических запросов к NCBI (`clinvar_database`)
 - `FDA_API_KEY` — опционально, выше лимит openFDA
+- `ALPHAGENOME_GTF_PATH` — внутренняя: путь к локальному GTF, если он не скачан;
+  `SSL_CERT_FILE` читается HTTP-клиентом навыков, отдельно задавать не нужно
 
 ClinVar, dbSNP, PubMed, openFDA, NCBI работают без ключа, но с лимитами частоты.
 

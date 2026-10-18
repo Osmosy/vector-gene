@@ -119,8 +119,10 @@ git clone https://github.com/Osmosy/vector-gene.git && cd vector-gene
    ```bash
    ALPHAGENOME_API_KEY=...   # обязателен для трёх alphagenome-навыков
    OPENALEX_API_KEY=...      # обязателен для literature_search_openalex
+   USER_EMAIL=...            # обязателен для protein_sequence_msa (EBI); NCBI тоже читает
    NCBI_API_KEY=...          # опционально: 10 req/s вместо 3
    NCBI_EMAIL=...            # опционально: идентификация клиента для NCBI
+   NCBI_TOOL=...             # опционально: идентификация клиента для NCBI
    FDA_API_KEY=...           # опционально: выше лимит openFDA
    ```
 
