@@ -103,18 +103,27 @@ FASTQ → fastqc → bwa mem (hg38, -R read group) → samtools sort → samtool
 
 ```bash
 git clone https://github.com/Osmosy/vector-gene.git && cd vector-gene
-
-# Научные скрипты работают только через uv (системный Python не подходит)
-npx skills add google-deepmind/science-skills/     # либо использовать вендор-копию skills/science/
-
-# Ключи — только для части навыков
-echo "ALPHAGENOME_API_KEY=..." >> ~/.env    # обязателен для трёх alphagenome-навыков
-echo "OPENALEX_API_KEY=..." >> ~/.env       # обязателен для literature_search_openalex
 ```
 
+1. **uv.** Научные скрипты запускаются через `uv run`; системный Python не подходит.
+   Установка: `curl -LsSf https://astral.sh/uv/install.sh | sh` (детали — `skills/science/uv/`).
+
+2. **Навыки.** Вендор-копия уже в репозитории — `skills/science/`, ставить ничего не нужно.
+   `npx skills add google-deepmind/science-skills/` — только если нужна глобальная установка
+   в другой агент; апстрим теперь рекомендует Google Antigravity с плагином Science.
+
+3. **Ключи** — только для части навыков. Открыть `~/.env` редактором (не `echo`, иначе
+   значение попадёт в историю shell), добавить нужные строки, затем `chmod 600 ~/.env`:
+
+   ```bash
+   ALPHAGENOME_API_KEY=...   # обязателен для трёх alphagenome-навыков
+   OPENALEX_API_KEY=...      # обязателен для literature_search_openalex
+   NCBI_API_KEY=...          # опционально: 10 req/s вместо 3
+   NCBI_EMAIL=...            # опционально: идентификация клиента для NCBI
+   FDA_API_KEY=...           # опционально: выше лимит openFDA
+   ```
+
 ClinVar, dbSNP, PubMed, openFDA, NCBI работают без ключа, но с лимитами частоты.
-Опционально: `NCBI_API_KEY` (10 запросов/с вместо 3), `NCBI_EMAIL`/`NCBI_TOOL` —
-идентификация клиента в запросах к NCBI (требование их политики для автоматических обращений).
 Проверка ключа идёт протоколом `skills/science/credentials/` — значение в контекст
 модели не попадает.
 

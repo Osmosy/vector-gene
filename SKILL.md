@@ -59,15 +59,20 @@ data/patient/              — OKF-шаблон данных пациента (�
 Секреты проверяются протоколом `skills/science/credentials/` — наличие ключа
 проверяется кодом возврата (`grep -sq`), значение в контекст не попадает.
 
-Ключи пишутся в `~/.env` одной строкой:
+Ключи пишутся в `~/.env` — редактором или через `read -s`, а не `echo "KEY=..." >> ~/.env`
+(значение попадает в историю shell):
 
 ```bash
-echo "ALPHAGENOME_API_KEY=..." >> ~/.env     # обязателен для трёх alphagenome-навыков
-echo "OPENALEX_API_KEY=..." >> ~/.env        # обязателен для literature_search_openalex
+# откройте ~/.env в редакторе и добавьте строку:
+#   ALPHAGENOME_API_KEY=...
+chmod 600 ~/.env
 ```
 
-Опционально: `NCBI_API_KEY` (10 req/s вместо 3), `NCBI_EMAIL` и `NCBI_TOOL` —
-идентификация клиента для автоматических запросов к NCBI (используются в `clinvar_database`).
+- `ALPHAGENOME_API_KEY` — обязателен для трёх alphagenome-навыков
+- `OPENALEX_API_KEY` — обязателен для literature_search_openalex
+- `NCBI_API_KEY` — опционально, 10 req/s вместо 3; `NCBI_EMAIL` и `NCBI_TOOL` —
+  идентификация клиента для автоматических запросов к NCBI (`clinvar_database`)
+- `FDA_API_KEY` — опционально, выше лимит openFDA
 
 ClinVar, dbSNP, PubMed, openFDA, NCBI работают без ключа, но с лимитами частоты.
 
