@@ -2,7 +2,7 @@
 name: vector-gene
 description: "Personal genomics: patient template + 40 science skills."
 version: 2.0.0
-author: Hermes Agent
+author: Osmosy
 based_on: google-deepmind/science-skills (Apache-2.0) + Rai220/my-health-public
 tags: [genomics, personal-health, variants, alphagenome, clinvar, gnomad]
 ---

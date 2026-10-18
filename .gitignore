@@ -16,7 +16,6 @@ uv.lock
 .env.local
 
 # Служебное
-__pycache__/
 *.log
 .zvec-grep/
 

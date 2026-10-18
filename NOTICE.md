@@ -2,9 +2,13 @@
 
 ## Код и документация этого репозитория
 
+Copyright 2026 Osmosy.
+
 Apache-2.0 — см. [LICENSE](LICENSE). Шаблон данных пациентов основан на
 [Rai220/my-health-public](https://github.com/Rai220/my-health-public) (без лицензии
 в апстриме — структура каталогов воспроизведена как идея, текст написан заново).
+
+Копирайт Google на файлы в `skills/science/` остаётся у Google LLC (см. ниже).
 
 ## Навыки в `skills/science/`
 
