@@ -65,6 +65,9 @@ echo "ALPHAGENOME_API_KEY=..." >> ~/.env     # обязателен для тр�
 echo "OPENALEX_API_KEY=..." >> ~/.env        # обязателен для literature_search_openalex
 ```
 
+Опционально: `NCBI_API_KEY` (10 req/s вместо 3), `NCBI_EMAIL` и `NCBI_TOOL` —
+идентификация клиента для автоматических запросов к NCBI (используются в `clinvar_database`).
+
 ClinVar, dbSNP, PubMed, openFDA, NCBI работают без ключа, но с лимитами частоты.
 
 ## Пайплайн: сырые данные → варианты → аннотация

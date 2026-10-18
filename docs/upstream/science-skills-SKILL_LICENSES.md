@@ -6,6 +6,8 @@ file at your request. To assist your compliance, relevant site references are
 included in the table below; however, please note that site addresses may change
 from time to time so the list below may be incomplete or may become outdated.
 
+
+
 Skill                                | Reference Url(s)
 ------------------------------------ | ----------------
 alphafold-database-fetch-and-analyze | https://alphafold.ebi.ac.uk/
@@ -42,3 +44,5 @@ string-database                      | https://string-db.org/cgi/access
 ucsc-conservation-and-tfbs           | https://genome.ucsc.edu/conditions.html and https://genome.ucsc.edu/goldenPath/help/api.html
 unibind-database                     | https://unibind.uio.no/ and https://unibind.uio.no/api/overview
 uniprot-database                     | https://www.uniprot.org/help/license and https://www.uniprot.org/help/api_queries
+
+

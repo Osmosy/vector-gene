@@ -16,10 +16,12 @@ Apache-2.0. Оригинальные файлы апстрима сохране�
 | [science-skills-LICENSE.txt](docs/upstream/science-skills-LICENSE.txt) | Apache License 2.0 (Copyright 2026 Google LLC) |
 | [science-skills-SKILL_LICENSES.md](docs/upstream/science-skills-SKILL_LICENSES.md) | условия использования сторонних баз (таблица «навык → URL») |
 | [science-skills-README.md](docs/upstream/science-skills-README.md) | README апстрима, включая дисклеймер «not an official Google product» |
-| [science-skills-plugin.json](docs/upstream/science-skills-plugin.json) | манифест плагина апстрима (v1.2.0) |
+| [science-skills-plugin.json](docs/upstream/science-skills-plugin.json) | манифест плагина апстрима (v1.3.0) |
 | [science-skills-CONTRIBUTING.md](docs/upstream/science-skills-CONTRIBUTING.md) | правила контрибуции апстрима |
 
-Копия зафиксирована на дату 2026-09-13 (последний push апстрима — 2026-09-08).
+Копия зафиксирована на 2026-10-18: коммит апстрима `99f3085bcb40514cdba7833205b3dedbf473b26d`
+(manifest 1.3.0, дата коммита 2026-10-15). Тега `v1.3.0` в апстриме нет — последний тег `v1.2.4`,
+поэтому фиксируется хеш, а не имя версии.
 
 ### Что покрывает Apache-2.0, а что нет
 
