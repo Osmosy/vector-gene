@@ -1,3 +1,4 @@
+# Пуш изменений этого файла требует токена с правом Workflows (fine-grained PAT).
 name: validate-docs
 
 on:
