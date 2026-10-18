@@ -203,7 +203,11 @@ def check_duplicates(root: Path) -> list[str]:
 
 
 def check_patient_summary(root: Path) -> list[str]:
-    """Числа в SUMMARY.md должны совпадать с таблицами в том же каталоге."""
+    """Числа в SUMMARY.md должны совпадать с таблицами в том же каталоге.
+
+    Метки обязательны: если SUMMARY существует, а счётчика нет — это ошибка, а не повод
+    пропустить проверку. Гипотезы считаются только со статусом «открыта».
+    """
     base = root / "data" / "patient"
     summary = base / "SUMMARY.md"
     if not summary.is_file():
@@ -211,25 +215,38 @@ def check_patient_summary(root: Path) -> list[str]:
     text = read(summary)
     errors: list[str] = []
 
-    def recount(path: Path, marker: str, row: re.Pattern[str] | None) -> int:
-        lines = read(path).splitlines()
-        if row is not None:
-            return sum(1 for line in lines if row.match(line))
-        if marker.startswith("|"):
-            return sum(1 for line in lines if line.startswith("|") and marker in line)
-        return sum(1 for line in lines if line.startswith(marker))
+    def active_meds(path: Path) -> int:
+        return sum(1 for line in read(path).splitlines()
+                   if line.startswith("|") and "| активен |" in line)
+
+    def open_hypotheses(path: Path) -> int:
+        total = 0
+        for line in read(path).splitlines():
+            if not line.startswith("|"):
+                continue
+            cells = [c.strip() for c in line.strip().strip("|").split("|")]
+            if len(cells) >= 4 and cells[0].isdigit() and cells[3].lower().startswith("открыта"):
+                total += 1
+        return total
+
+    def questions(path: Path) -> int:
+        return sum(1 for line in read(path).splitlines() if line.startswith("- "))
 
     cases = (
-        ("Активных препаратов", "MEDS.md", "| активен |", None),
-        ("Открытых гипотез", "HYPOTHESES.md", "", re.compile(r"^\|\s*\d+\s*\|")),
-        ("Вопросов врачу", "QUESTIONS.md", "- ", None),
+        ("Активных препаратов", "MEDS.md", active_meds),
+        ("Открытых гипотез", "HYPOTHESES.md", open_hypotheses),
+        ("Вопросов врачу", "QUESTIONS.md", questions),
     )
-    for label, filename, marker, row in cases:
+    for label, filename, counter in cases:
         m = re.search(rf"{label}:\s*(\d+)", text)
         path = base / filename
-        if not m or not path.is_file():
+        if not m:
+            errors.append(f"SUMMARY: нет строки «{label}: N»")
             continue
-        real = recount(path, marker, row)
+        if not path.is_file():
+            errors.append(f"SUMMARY: счётчик «{label}» есть, а {filename} нет")
+            continue
+        real = counter(path)
         if int(m.group(1)) != real:
             errors.append(f"SUMMARY: «{label}: {m.group(1)}», а в {filename} — {real}")
     return errors
