@@ -32,7 +32,7 @@ Apache-2.0. Оригинальные файлы апстрима сохране�
 - **Скрипты и инструкции навыков** — Apache-2.0, можно свободно использовать,
   изменять и распространять с сохранением копирайта Google и текста лицензии.
 - **Данные, полученные через навыки** — под условиями своих источников. Таблица
-  источников: [upstream/science-skills-SKILL_LICENSES.md](docs/upstream/science-skills-SKILL_LICENSES.md).
+  источников: [docs/upstream/science-skills-SKILL_LICENSES.md](docs/upstream/science-skills-SKILL_LICENSES.md).
   У части баз условия с требованием атрибуции: GTEx, Human Protein Atlas, Reactome,
   Open Targets, UniProt/InterPro/QuickGO (Terms of Use EMBL-EBI), RCSB PDB, UCSC,
   NCBI (ClinVar, dbSNP, PubMed, sequence fetch).

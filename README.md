@@ -110,8 +110,7 @@ git clone https://github.com/Osmosy/vector-gene.git && cd vector-gene
    Установка: `curl -LsSf https://astral.sh/uv/install.sh | sh` (детали — `skills/science/uv/`).
 
 2. **Навыки.** Вендор-копия уже в репозитории — `skills/science/`, ставить ничего не нужно.
-   `npx skills add google-deepmind/science-skills/` — только если нужна глобальная установка
-   в другой агент; апстрим теперь рекомендует Google Antigravity с плагином Science.
+   Альтернатива для другого агента: `npx skills add google-deepmind/science-skills/`.
 
 3. **Ключи** — только для части навыков. Открыть `~/.env` редактором (не `echo`, иначе
    значение попадёт в историю shell), добавить нужные строки, затем `chmod 600 ~/.env`:
