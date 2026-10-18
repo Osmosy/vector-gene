@@ -41,9 +41,12 @@ Hermes Agent — слой рассуждений
         │
         ├── ГЕНОМИКА   clinvar · gnomad · dbsnp · gtex · encode · ucsc · unibind · jaspar · ensembl
         ├── МОДЕЛИ     alphagenome ×3 (AVI-скоры, анализ варианта, deep-links в Atlas)
-        ├── БЕЛКИ      alphafold · pdb · foldseek · uniprot · interpro · string · hpa · msa · pymol
+        ├── БЕЛКИ      alphafold · pdb · foldseek · uniprot · interpro · string · hpa · msa · similarity · pymol
         ├── ХИМИЯ      chembl · pubchem · openfda · opentargets · clinical_trials
         ├── ЛИТЕРАТУРА pubmed · europepmc · openalex · arxiv · biorxiv
+        ├── ПУТИ/ОНТОЛОГИИ reactome · quickgo · embl_ebi_ols
+        ├── ПОСЛЕДОВАТЕЛЬНОСТИ ncbi_sequence_fetch
+        ├── ПРОЧЕЕ     predictingthepast
         └── СЛУЖЕБНЫЕ  uv · credentials · workflow_skill_creator
         │
         ▼

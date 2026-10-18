@@ -41,7 +41,7 @@ tags: [genomics, personal-health, variants, alphagenome, clinvar, gnomad]
 skills/science/            — 40 навыков Google DeepMind (Apache-2.0), вендор-копия
   alphagenome_*            — 3 навыка: AVI-скоры, анализ варианта, deep-links в Atlas
   clinvar / gnomad / dbsnp / gtex / encode / ucsc / unibind / jaspar / ensembl
-  alphafold / pdb / foldseek / uniprot / interpro / string / hpa / msa / pymol
+  alphafold / pdb / foldseek / uniprot / interpro / string / hpa / msa / protein_sequence_similarity_search / pymol
   chembl / pubchem / openfda / opentargets / clinical_trials
   pubmed / europepmc / openalex / arxiv / biorxiv
   reactome / quickgo / embl_ebi_ols / ncbi_sequence_fetch / predictingthepast
