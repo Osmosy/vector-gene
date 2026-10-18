@@ -111,8 +111,10 @@ bcftools mpileup -f ref/hg38.fa aligned/sample.markdup.bam | bcftools call -mv -
 Проверено 2026-10-18 на фрагменте chr22 (100 кб, `wgsim -N 20000 -S 42`): цепочка
 `bwa mem | collate | fixmate -m | sort | markdup` даёт 40 000 ридов, 100% mapped,
 18 помеченных дублей и 111 вариантов в VCF (bwa 0.7.19, samtools 1.24, bcftools 1.24).
-Воспроизводится: `bash scripts/smoke_pipeline.sh` — он же проверяет, что без
-`collate`/`fixmate` тот же вход падает с `samtools markdup: error, no ms score tag`.
+Воспроизводится: `bash scripts/smoke_pipeline.sh` — он сверяет все четыре числа
+(включая долю mapped), фиксирует seed и `bwa mem -K 10000000`, чтобы результат не
+зависел от `-t`, и отдельно проверяет, что без `collate`/`fixmate` тот же вход падает
+с `samtools markdup: error, no ms score tag`.
 
 Для WGS рекомендуемый путь — GATK/DeepVariant; это минимальный пример для панели/WES.
 

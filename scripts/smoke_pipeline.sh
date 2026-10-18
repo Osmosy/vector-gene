@@ -29,6 +29,8 @@ THREADS="${THREADS:-4}"
 
 # Ожидаемые значения при этих параметрах (bwa 0.7.19, samtools 1.24, bcftools 1.24).
 EXP_TOTAL=40000
+EXP_MAPPED=40000
+EXP_MAPPED_PCT=100.00
 EXP_DUP=18
 EXP_VARIANTS=111
 
@@ -58,7 +60,7 @@ echo "== риды: wgsim -N $PAIRS, seed $SEED =="
 wgsim -N "$PAIRS" -1 150 -2 150 -e 0.001 -S "$SEED" ref/frag.fa raw/r1.fastq raw/r2.fastq >/dev/null 2>&1
 
 echo "== конвейер из SKILL.md =="
-bwa mem -t "$THREADS" -R '@RG\tID:sample\tSM:sample\tPL:ILLUMINA' ref/frag.fa raw/r1.fastq raw/r2.fastq 2>/dev/null \
+bwa mem -t "$THREADS" -K 10000000 -R '@RG\tID:sample\tSM:sample\tPL:ILLUMINA' ref/frag.fa raw/r1.fastq raw/r2.fastq 2>/dev/null \
   | samtools collate -O -u - \
   | samtools fixmate -m -u - - \
   | samtools sort -u - \
@@ -67,22 +69,28 @@ samtools index aligned/sample.markdup.bam
 bcftools mpileup -f ref/frag.fa aligned/sample.markdup.bam 2>/dev/null \
   | bcftools call -mv -o variants/sample.vcf 2>/dev/null
 
-TOTAL=$(samtools flagstat aligned/sample.markdup.bam | awk 'NR==1{print $1}')
-DUP=$(samtools flagstat aligned/sample.markdup.bam | grep -m1 'duplicates' | awk '{print $1}')
+FLAGSTAT=$(samtools flagstat aligned/sample.markdup.bam)
+TOTAL=$(printf '%s\n' "$FLAGSTAT" | awk 'NR==1{print $1}')
+MAPPED=$(printf '%s\n' "$FLAGSTAT" | grep -m1 ' mapped ' | awk '{print $1}')
+MAPPED_PCT=$(printf '%s\n' "$FLAGSTAT" | grep -m1 ' mapped ' | sed -E 's/.*\(([0-9.]+)%.*/\1/')
+DUP=$(printf '%s\n' "$FLAGSTAT" | grep -m1 'duplicates' | awk '{print $1}')
 VARIANTS=$(grep -vc '^#' variants/sample.vcf || true)
 
 echo "== результат =="
-echo "ридов:    $TOTAL (ожидается $EXP_TOTAL)"
-echo "дублей:   $DUP (ожидается $EXP_DUP)"
-echo "вариантов: $VARIANTS (ожидается $EXP_VARIANTS)"
+echo "ридов:      $TOTAL (ожидается $EXP_TOTAL)"
+echo "mapped:     $MAPPED ($MAPPED_PCT%, ожидается $EXP_MAPPED / $EXP_MAPPED_PCT%)"
+echo "дублей:     $DUP (ожидается $EXP_DUP)"
+echo "вариантов:  $VARIANTS (ожидается $EXP_VARIANTS)"
 
 STATUS=0
 [ "$TOTAL" = "$EXP_TOTAL" ] || { echo "расхождение: риды" >&2; STATUS=1; }
+[ "$MAPPED" = "$EXP_MAPPED" ] || { echo "расхождение: mapped" >&2; STATUS=1; }
+[ "$MAPPED_PCT" = "$EXP_MAPPED_PCT" ] || { echo "расхождение: доля mapped ($MAPPED_PCT%)" >&2; STATUS=1; }
 [ "$DUP" = "$EXP_DUP" ] || { echo "расхождение: дубли" >&2; STATUS=1; }
 [ "$VARIANTS" = "$EXP_VARIANTS" ] || { echo "расхождение: варианты" >&2; STATUS=1; }
 
 echo "== негативная проверка: без collate/fixmate =="
-bwa mem -t "$THREADS" -R '@RG\tID:sample\tSM:sample\tPL:ILLUMINA' ref/frag.fa raw/r1.fastq raw/r2.fastq 2>/dev/null \
+bwa mem -t "$THREADS" -K 10000000 -R '@RG\tID:sample\tSM:sample\tPL:ILLUMINA' ref/frag.fa raw/r1.fastq raw/r2.fastq 2>/dev/null \
   | samtools sort -o aligned/old.bam - 2>/dev/null
 if samtools markdup -r aligned/old.bam aligned/old.markdup.bam 2>err.txt; then
   echo "ошибка: markdup прошёл без fixmate — ожидался отказ" >&2
