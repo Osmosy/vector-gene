@@ -13,11 +13,11 @@ Apache-2.0. Оригинальные файлы апстрима сохране�
 
 | Файл | Что это |
 |------|---------|
-| [science-skills-LICENSE.txt](upstream/science-skills-LICENSE.txt) | Apache License 2.0 (Copyright 2026 Google LLC) |
-| [science-skills-SKILL_LICENSES.md](upstream/science-skills-SKILL_LICENSES.md) | условия использования сторонних баз (таблица «навык → URL») |
-| [science-skills-README.md](upstream/science-skills-README.md) | README апстрима, включая дисклеймер «not an official Google product» |
-| [science-skills-plugin.json](upstream/science-skills-plugin.json) | манифест плагина апстрима (v1.2.0) |
-| [science-skills-CONTRIBUTING.md](upstream/science-skills-CONTRIBUTING.md) | правила контрибуции апстрима |
+| [science-skills-LICENSE.txt](docs/upstream/science-skills-LICENSE.txt) | Apache License 2.0 (Copyright 2026 Google LLC) |
+| [science-skills-SKILL_LICENSES.md](docs/upstream/science-skills-SKILL_LICENSES.md) | условия использования сторонних баз (таблица «навык → URL») |
+| [science-skills-README.md](docs/upstream/science-skills-README.md) | README апстрима, включая дисклеймер «not an official Google product» |
+| [science-skills-plugin.json](docs/upstream/science-skills-plugin.json) | манифест плагина апстрима (v1.2.0) |
+| [science-skills-CONTRIBUTING.md](docs/upstream/science-skills-CONTRIBUTING.md) | правила контрибуции апстрима |
 
 Копия зафиксирована на дату 2026-09-13 (последний push апстрима — 2026-09-08).
 
@@ -26,7 +26,7 @@ Apache-2.0. Оригинальные файлы апстрима сохране�
 - **Скрипты и инструкции навыков** — Apache-2.0, можно свободно использовать,
   изменять и распространять с сохранением копирайта Google и текста лицензии.
 - **Данные, полученные через навыки** — под условиями своих источников. Таблица
-  источников: [upstream/science-skills-SKILL_LICENSES.md](upstream/science-skills-SKILL_LICENSES.md).
+  источников: [upstream/science-skills-SKILL_LICENSES.md](docs/upstream/science-skills-SKILL_LICENSES.md).
   У части баз условия с требованием атрибуции: GTEx, Human Protein Atlas, Reactome,
   Open Targets, UniProt/InterPro/QuickGO (Terms of Use EMBL-EBI), RCSB PDB, UCSC,
   NCBI (ClinVar, dbSNP, PubMed, sequence fetch).
