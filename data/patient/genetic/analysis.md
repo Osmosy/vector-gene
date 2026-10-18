@@ -13,9 +13,10 @@
   «reviewed by expert panel».
 - **gnomAD** (`gnomad_database`): AF ≈ 2·10⁻⁵ (условное значение, SYNTHETIC).
 - **AlphaGenome AVI** (`alphagenome_variant_impact_score`, `--include_features`):
-  вариант покрыт моделью (миссенс): `avi_phred` 24.8, `avi_quantile` 0.0012,
+  вариант покрыт моделью (миссенс): `avi_phred` 29.2, `avi_quantile` 0.0012,
   `avi_raw` 0.81, `top_modality` `AlphaMissense`, `fi_ALPHAMISSENSE` 0.71
-  (числа условные, SYNTHETIC).
+  (числа условные, SYNTHETIC; Phred согласован с квантилем по формуле
+  `−10·log10(avi_quantile)`).
 - **Вывод:** патогенность подтверждается ClinVar, AVI с ней согласуется. Это не
   самостоятельный скор AlphaMissense, а его вклад внутри AVI. Клиническая
   интерпретация — HYPOTHESES.md №1, требует подтверждения врачом.
@@ -30,9 +31,10 @@
 ## Вариант 3 — вымышленный регуляторный вариант chrN:1000000:G>T (без rsID)
 
 - **AlphaGenome** (`alphagenome_single_variant_analysis`): модель ответила,
-  `avi_quantile` 0.99 при `avi_raw` 0.01 (числа условные, SYNTHETIC).
+  `quantile_score` 0.99 при `raw_score` 0.01 (числа условные, SYNTHETIC).
 - **Вывод:** **значимого молекулярного эффекта не предсказано** — высокий квантиль
-  без магнитуды не является находкой.
+  без магнитуды не является находкой (у навыка критерий `|quantile_score| > 0.995`
+  при осмысленном `raw_score`).
 
 ## Пример статуса «вне области модели»
 

@@ -39,3 +39,8 @@ data/patient/
 4. «Вывод» в `genetic/analysis.md` — только о том, что показали базы (патогенность,
    частота, покрытие моделью). Клинические следствия из него — в `HYPOTHESES.md`,
    а не в «Выводе».
+5. Квантили у двух навыков AlphaGenome не взаимозаменяемы. У AVI `avi_quantile` —
+   хвостовой (1 − CDF): меньше значит сильнее, `avi_phred = −10·log10(avi_quantile)`.
+   У `alphagenome_single_variant_analysis` `quantile_score` знаковый: чем ближе к ±1,
+   тем сильнее (порог `|quantile_score| > 0.995`). Поля одного навыка не подставлять
+   в запись о другом.
