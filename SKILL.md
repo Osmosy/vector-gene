@@ -4,7 +4,7 @@ description: "Personal genomics: patient template + 40 science skills."
 version: 2.0.0
 author: Hermes Agent
 based_on: google-deepmind/science-skills (Apache-2.0) + Rai220/my-health-public
-tags: [genomics, personal-health, variants, alphagenome, clinvar, gnomad, pharmgkb]
+tags: [genomics, personal-health, variants, alphagenome, clinvar, gnomad]
 ---
 
 # Vector Gene — Personal Genomics with AI Agents
@@ -18,7 +18,8 @@ tags: [genomics, personal-health, variants, alphagenome, clinvar, gnomad, pharmg
 - Нужна аннотация варианта: что о нём известно клинически (ClinVar), как часто
   встречается (gnomAD), где ген экспрессируется (GTEx), что рядом регуляторного
   (ENCODE), как предсказано функциональное влияние (AlphaGenome AVI)
-- Фармакогенетика: CYP2C9/CYP2C19/VKORC1/CYP4F2 и другие гены метаболизма
+- Фармакогенетика: CYP2C9/CYP2C19/VKORC1/CYP4F2 и другие гены метаболизма —
+  **ручная сверка с PharmGKB/CPIC; отдельного навыка в коллекции нет**
 - Проверка лабораторного отчёта по сырым данным
 
 ## Когда НЕ использовать
