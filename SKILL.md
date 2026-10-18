@@ -121,8 +121,8 @@ Open Targets → ChEMBL → ClinicalTrials → openFDA → PubMed    (терап
 
 Формулировка вывода в первом и втором случае — «значимого молекулярного эффекта
 AlphaGenome не предсказывает», а не поиск объяснения. Готовые разборы лежат в
-`skills/science/alphagenome_single_variant_analysis/docs/examples/` (шесть кейсов,
-три из них — отрицательные).
+`skills/science/alphagenome_single_variant_analysis/docs/examples/` (шесть кейсов:
+отрицательные результаты и границы модели).
 
 Отдельно: для snRNA/tRNA/rRNA модель не симулирует посттранскрипционную укладку —
 при анализе таких генов это надо оговаривать явно (кейс RNU4ATAC).
