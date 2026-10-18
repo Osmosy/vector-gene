@@ -12,7 +12,8 @@
 # воспроизводимы для указанных версий инструментов.
 #
 # Требуется: curl, python3, bwa, samtools, bcftools, wgsim (bioconda).
-# Проверено на bwa 0.7.19, samtools 1.24, bcftools 1.24, wgsim 0.3.1.
+# Проверено на bwa 0.7.19, samtools 1.24, bcftools 1.24, wgsim 1.0 (bioconda,
+# сборка h577a1d6_10: бинарник печатает «Version: 1.24» — это версия htslib внутри неё).
 #
 # Использование:  bash scripts/smoke_pipeline.sh [каталог]
 # Выход: 0 — счётчики совпали, 1 — расхождение или падение.
@@ -48,8 +49,20 @@ bcftools --version | head -1
 bwa 2>&1 | grep -m1 '^Version' || true
 
 echo "== референс: $CHROM:$START-$END (hg38, UCSC API) =="
-curl -sf "https://api.genome.ucsc.edu/getData/sequence?genome=hg38;chrom=${CHROM};start=${START};end=${END}" \
-  | python3 -c "import json,sys; s=json.load(sys.stdin)['dna'].upper(); print('>%s_%s_%s' % ('$CHROM',$START,$END)); [print(s[i:i+60]) for i in range(0,len(s),60)]" \
+# UCSC — внешняя точка: три попытки, иначе сетевой сбой выглядел бы как ошибка пайплайна.
+fetch_ref() {
+  local attempt
+  for attempt in 1 2 3; do
+    if curl -sf "https://api.genome.ucsc.edu/getData/sequence?genome=hg38;chrom=${CHROM};start=${START};end=${END}" -o ref.json; then
+      return 0
+    fi
+    echo "UCSC API не ответил (попытка $attempt), повтор через 5 с" >&2
+    sleep 5
+  done
+  return 1
+}
+fetch_ref || { echo "не удалось получить референс с UCSC API" >&2; exit 1; }
+python3 -c "import json,sys; s=json.load(open('ref.json'))['dna'].upper(); print('>%s_%s_%s' % ('$CHROM','$START','$END')); [print(s[i:i+60]) for i in range(0,len(s),60)]" \
   > ref/frag.fa
 [ -s ref/frag.fa ] || { echo "пустой референс" >&2; exit 1; }
 

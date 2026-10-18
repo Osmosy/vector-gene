@@ -1,0 +1,35 @@
+# Пуш изменений этого файла требует токена с правом Workflows (fine-grained PAT).
+name: smoke-pipeline
+
+# Только ручной запуск. Прогон занимает ~5 секунд, но тянет фрагмент генома с UCSC
+# и ставит bioconda-окружение: держать это на каждый push/PR незачем.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # Версии запинены намеренно: ожидаемые счётчики (40 000 ридов, 18 дублей,
+      # 111 вариантов) воспроизводимы только на них. «Последние» версии дадут
+      # ложное падение при любом обновлении samtools/bcftools.
+      - name: Окружение bioconda
+        uses: mamba-org/setup-micromamba@v3
+        with:
+          environment-name: bio
+          create-args: >-
+            -c conda-forge -c bioconda
+            samtools=1.24
+            bcftools=1.24
+            bwa=0.7.19
+            wgsim=1.0
+          cache-environment: true
+
+      - name: Пайплайн и сверка счётчиков
+        shell: bash -el {0}
+        run: bash scripts/smoke_pipeline.sh "$RUNNER_TEMP/smoke"
