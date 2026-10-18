@@ -116,6 +116,10 @@ bcftools mpileup -f ref/hg38.fa aligned/sample.markdup.bam | bcftools call -mv -
 зависел от `-t`, и отдельно проверяет, что без `collate`/`fixmate` тот же вход падает
 с `samtools markdup: error, no ms score tag`.
 
+В CI тот же прогон доступен вручную: workflow `smoke-pipeline` (`workflow_dispatch`),
+окружение bioconda с запиненными версиями. Прогон от 2026-10-18 дал 40000 / 100.00% /
+18 / 111 и ту же негативную проверку.
+
 Для WGS рекомендуемый путь — GATK/DeepVariant; это минимальный пример для панели/WES.
 
 Аннотацию делает агент навыками, а не сам: `dbsnp_database` (rsID → координаты) →
