@@ -74,11 +74,17 @@ Hermes Agent — слой рассуждений
 
 ## Пайплайн
 
+Инструменты пайплайна (`fastqc`, `bwa`, `samtools`, `bcftools`) — внешние: в коллекции
+навыков их нет, ставятся отдельно (conda/bioconda). Перед первым запуском нужны индексы
+референса: `bwa index ref/hg38.fa` и `samtools faidx ref/hg38.fa`.
+
 ```
-FASTQ → fastqc → bwa mem (hg38) → samtools sort → bcftools call
+FASTQ → fastqc → bwa mem (hg38, -R read group) → samtools sort → samtools markdup
+      → samtools index → bcftools mpileup/call
       → ClinVar / gnomAD / dbSNP / GTEx / ENCODE → AlphaGenome
 ```
 
+Для WGS рекомендуемый путь — GATK/DeepVariant; выше минимальный пример для VCF/панели.
 Для готовых SNP-таблиц (23andMe, Genotek, Atlas) первые шаги не нужны — аннотация
 начинается сразу. Сквозные цепочки, которые коллекция держит намеренно:
 

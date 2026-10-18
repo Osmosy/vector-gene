@@ -74,18 +74,27 @@ ClinVar, dbSNP, PubMed, openFDA, NCBI работают без ключа, но �
 ## Пайплайн: сырые данные → варианты → аннотация
 
 ```bash
+# Инструменты внешние (в коллекции навыков их нет): conda install -c bioconda fastqc bwa samtools bcftools
+# 0. Индексы референса (один раз)
+bwa index ref/hg38.fa
+samtools faidx ref/hg38.fa
 # 1. QC
 fastqc raw/*.fastq.gz -o qc/
-# 2. Выравнивание на hg38
-bwa mem -t 8 ref/hg38.fa raw/sample_R1.fastq.gz raw/sample_R2.fastq.gz | \
-  samtools sort -o aligned/sample.bam
-# 3. Вызов вариантов
-bcftools mpileup -f ref/hg38.fa aligned/sample.bam | bcftools call -mv -o variants/sample.vcf
+# 2. Выравнивание на hg38: read group обязателен, иначе mpileup/ GATK дадут некорректный результат
+bwa mem -t 8 -R '@RG\tID:sample\tSM:sample\tPL:ILLUMINA' ref/hg38.fa \
+  raw/sample_R1.fastq.gz raw/sample_R2.fastq.gz | samtools sort -o aligned/sample.bam
+# 3. Маркировка дублей и индекс
+samtools markdup -r aligned/sample.bam aligned/sample.markdup.bam
+samtools index aligned/sample.markdup.bam
+# 4. Вызов вариантов
+bcftools mpileup -f ref/hg38.fa aligned/sample.markdup.bam | bcftools call -mv -o variants/sample.vcf
 ```
 
+Для WGS рекомендуемый путь — GATK/DeepVariant; это минимальный пример.
+
 Аннотацию делает агент навыками, а не сам: `clinvar_database` → `gnomad_database` →
-`gtex_database` → `encode_ccres_database` → `alphagenome_*`. Для 23andMe/Genotek
-(готовые SNP-таблицы) шаги 1–3 не нужны, начинается сразу с аннотации.
+`dbsnp_database` → `gtex_database` → `encode_ccres_database` → `alphagenome_*`.
+Для 23andMe/Genotek (готовые SNP-таблицы) шаги 1–4 не нужны, начинается сразу с аннотации.
 
 Сквозные цепочки, которые коллекция держит намеренно:
 
